@@ -1,5 +1,7 @@
 # https://console.cloud.google.com/projectselector/iam-admin/serviceaccounts/create?_ga=2.117243718.1170366991.1665417377-1266140962.1664402679&_gac=1.196159326.1664403025.CjwKCAjw4c-ZBhAEEiwAZ105RUjsysQV6gEd2MzPmGaxd7bfKg4JwQhfQY55SGlOsNLzLOBf9PWOAhoCS5gQAvD_BwE
 # gcloud services enable storage.googleapis.com
+# gcloud services enable compute.googleapis.com
+# gcloud services enable cloudbilling.googleapis.com  
 
 terraform {
   required_version = ">= 1.2.0"
@@ -55,8 +57,7 @@ resource "google_compute_instance" "default" {
     }
   }
 
-  # Install Flask
-  metadata_startup_script = "${file("./../utils/install.sh")}"
+  # metadata_startup_script = "${file("./../utils/install.sh")}"
 
   network_interface {
     subnetwork = google_compute_subnetwork.default.id
@@ -65,21 +66,26 @@ resource "google_compute_instance" "default" {
   }
 
   metadata = {
-    ssh-keys = "maincra:${file("./../creds/gcloud_instance.pub")}"
+    ssh-keys = "${var.user}:${file("./../creds/gcloud_instance.pub")}"
   }
-
-  provisioner "file" {
-  source = "creds/test_file"
-  destination = "/tmp/test_file"
 
   connection {
     host = "${self.network_interface.0.access_config.0.nat_ip}"
     type = "ssh"
-    user = "maincra"
+    user = "${var.user}"
     private_key = "${file("./../creds/gcloud_instance")}"
     agent = "false"
   }
-}
+
+  provisioner "file" {
+    source = "${var.use_backup}" == "yes" ? "./../server-conf/backup.zip" : "./../server-conf/server.properties"
+    destination = "${var.use_backup}" == "yes" ? "/home/${var.user}/backup.zip" :"/home/${var.user}/server.properties"
+  }
+
+  provisioner "file" {
+    source = "./../utils/install.sh"
+    destination = "/tmp/install_script.sh"
+  }
 }
 
 resource "google_compute_firewall" "ssh" {
@@ -155,4 +161,16 @@ resource "google_compute_firewall" "maincra-egress" {
   priority      = 1000
   source_ranges = ["0.0.0.0/0"]
   target_tags   = ["maincra-egress"]
+}
+
+output "ip_host" {
+  value = "${google_compute_instance.default.network_interface.0.access_config.0.nat_ip}"
+}
+
+output "user_host" {
+  value = "${var.user}"
+}
+
+output "use_backup" {
+  value = "${var.use_backup}"
 }
