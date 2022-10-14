@@ -4,9 +4,10 @@ SHELL := /bin/bash
 # Bash Strict Mode
 .SHELLFLAGS := -eu -o pipefail -c
 
-all: init apply provisioning setstate
+all: apply provisioning setstate
 
 init:
+	bash ./utils/prepare.sh
 	terraform -chdir=./infrastructure init
 
 plan:
@@ -18,10 +19,11 @@ apply:
 	terraform -chdir=./infrastructure output -raw user_host > user_host
 	terraform -chdir=./infrastructure output -raw use_backup > use_backup
 
-iphost := $(shell cat ./ip_host)
-userhost := $(shell cat ./user_host)
-usebackup := $(shell cat ./use_backup)
+.ONESHELL:
 provisioning:
+	$(eval iphost := $(shell cat ./ip_host))
+	$(eval userhost := $(shell cat ./user_host))
+	$(eval usebackup := $(shell cat ./use_backup))
 	ssh -i ./creds/gcloud_instance -o StrictHostKeychecking=no $(userhost)@$(iphost) "bash /tmp/install_script.sh $(usebackup)"
 
 setstate:

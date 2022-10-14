@@ -18,7 +18,7 @@ mkdir /home/$USER/mcServer-backup
 chmod 774 /home/$USER/plugins
 chmod 774 /home/$USER/mcServer-backup
 
-sudo apt-get install -y wget unzip
+sudo apt-get install -y wget unzip zip
 
 wget -O /home/$USER/plugins/floodgate-spigot.jar https://ci.opencollab.dev/job/GeyserMC/job/Floodgate/job/master/lastSuccessfulBuild/artifact/spigot/build/libs/floodgate-spigot.jar
 wget -O /home/$USER/plugins/Geyser-spigot.jar https://ci.opencollab.dev//job/GeyserMC/job/Geyser/job/master/lastSuccessfulBuild/artifact/bootstrap/spigot/build/libs/Geyser-Spigot.jar
@@ -35,16 +35,21 @@ fi
 chmod 774 /home/$USER/mcServer
 
 sudo docker run -d -v /home/$USER/plugins:/data/plugins -v /home/$USER/mcServer:/data --name mcServer -e MOTD='David es joto automatizado' -e MODE=survival -e PVP=true -e VERSION=1.19.2 -e EULA=TRUE -e ENABLE_RCON=TRUE -e RCON_PASSWORD=davidjoto2806 -e REPLACE_ENV_VARIABLES=TRUE -e TYPE=BUKKIT -e PLUGINS_SYNC_UPDATE=false -p 25565:25565 -p 25575:25575 -p 19132:19132/udp itzg/minecraft-server
-sudo docker run -d -v /home/$USER/mcServer:/data:ro -v /home/$USER/mcServer-backup:/backups -e SRC_DIR=/data -e BACKUP_NAME=world -e INITIAL_DELAY=2m -e BACKUP_INTERVAL=24h -e PRUNE_BACKUPS_DAYS=3 -e BACKUP_METHOD=tar -e RCON_PASSWORD=davidjoto2806 --network="host" itzg/mc-backup
-
-
 
 while true; do
   str=`sudo docker ps -a`
-  echo Output: $str
+  echo "Starting Server"
   if [[ $str =~ "(healthy)" ]]; then
     break
   fi
-  sleep .5
+  sleep 5
 done
+
+echo "Server Started"
+
+echo "Starting Backups"
+sudo docker run -d -v /home/$USER/mcServer:/data:ro -v /home/$USER/mcServer-backup:/backups -e SRC_DIR=/data -e BACKUP_NAME=world -e INITIAL_DELAY=2m -e BACKUP_INTERVAL=24h -e PRUNE_BACKUPS_DAYS=3 -e BACKUP_METHOD=tar -e RCON_PASSWORD=davidjoto2806 --network="host" itzg/mc-backup
+echo "Backups Started"
+
+
 echo "Done!"
