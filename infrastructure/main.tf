@@ -52,8 +52,6 @@ resource "google_compute_instance" "default" {
     }
   }
 
-  # metadata_startup_script = "${file("./../utils/install.sh")}"
-
   network_interface {
     subnetwork = google_compute_subnetwork.default.id
 
@@ -75,6 +73,12 @@ resource "google_compute_instance" "default" {
   provisioner "file" {
     source = "${var.use_backup}" == "yes" ? "./../server-conf/backup.zip" : "./../server-conf/server.properties"
     destination = "${var.use_backup}" == "yes" ? "/home/${var.user}/backup.zip" :"/home/${var.user}/server.properties"
+  }
+
+  provisioner "file" {
+    count = var.use_plugins ? 1 : 0
+    source = "./../server-conf/plugins.zip"
+    destination = "/home/${var.user}/plugins.zip"
   }
 
   provisioner "file" {

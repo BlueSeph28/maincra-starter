@@ -14,5 +14,4 @@ echo -e "terraform {\n\trequired_version = \">= 1.2.0\"\n}" > ./infrastructure/b
 
 rm -rf ./creds
 rm ./ip_host
-rm ./use_backup
 rm ./user_host

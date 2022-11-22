@@ -15,3 +15,9 @@ variable "use_backup" {
   description = "Specifies if a backup will be used, use yes if you have a zip named backup"
   default     = "no"
 }
+
+variable "use_plugins" {
+  type        = string
+  description = "Specifies if a backup will be used, use yes if you have a zip named backup"
+  default     = "no"
+}
