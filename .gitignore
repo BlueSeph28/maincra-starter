@@ -4,6 +4,7 @@ server-conf/plugins.zip
 ## Backups
 server-conf/backup.zip
 backups/*
+server-conf/rclone.conf
 
 ## credentials
 creds/*
