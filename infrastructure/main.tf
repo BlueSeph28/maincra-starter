@@ -76,6 +76,12 @@ resource "google_compute_instance" "default" {
   }
 
   provisioner "file" {
+    count = var.use_backup ? 1 : 0
+    source = "./../server-conf/rclone.conf"
+    destination = "/home/${var.user}/rclone.conf"
+  }
+
+  provisioner "file" {
     count = var.use_plugins ? 1 : 0
     source = "./../server-conf/plugins.zip"
     destination = "/home/${var.user}/plugins.zip"

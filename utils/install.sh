@@ -8,10 +8,15 @@ curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o 
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 
 sudo apt-get update
-sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin cron
+sudo -v ; curl https://rclone.org/install.sh | sudo bash
+rclone config show
+RCLONEFILE=$(rclone config file | tail -1)
+mv /home/$USER/rclone.conf $RCLONEFILE
 
 mkdir /home/$USER/plugins
 mkdir /home/$USER/mcServer-backup
+rclone sync maincra-drive:/ /home/$USER/mcServer-backup/
 
 chmod 774 /home/$USER/plugins
 chmod 774 /home/$USER/mcServer-backup
@@ -22,9 +27,6 @@ if test -f "/home/$USER/plugins.zip"; then
   unzip /home/$USER/plugins.zip
   rm /home/$USER/plugins.zip
 fi
-# wget -O /home/$USER/plugins/floodgate-spigot.jar https://ci.opencollab.dev/job/GeyserMC/job/Floodgate/job/master/lastSuccessfulBuild/artifact/spigot/build/libs/floodgate-spigot.jar
-# wget -O /home/$USER/plugins/Geyser-spigot.jar https://ci.opencollab.dev//job/GeyserMC/job/Geyser/job/master/lastSuccessfulBuild/artifact/bootstrap/spigot/build/libs/Geyser-Spigot.jar
-# wget -O /home/$USER/plugins/SkinsRestorer.jar https://www.spigotmc.org/resources/skinsrestorer.2124/download?version=464299
 
 if test -f "/home/$USER/backup.zip"; then
   unzip /home/$USER/backup.zip
@@ -51,7 +53,7 @@ echo "Server Started"
 
 echo "Starting Backups"
 sudo docker run -d -v /home/$USER/mcServer:/data:ro -v /home/$USER/mcServer-backup:/backups -e SRC_DIR=/data -e BACKUP_NAME=world -e INITIAL_DELAY=2m -e BACKUP_INTERVAL=24h -e PRUNE_BACKUPS_DAYS=3 -e BACKUP_METHOD=tar -e RCON_PASSWORD=davidjoto2806 -e EXCLUDES=bluemap --network="host" itzg/mc-backup
+(crontab -l 2>/dev/null; echo "0 4 * * * rclone sync /home/$USER/mcServer-backup/ maincra-drive:/") | crontab -
 echo "Backups Started"
-
 
 echo "Done!"
