@@ -40,7 +40,7 @@ baremetalProvision:
 	scp -i baremetal_server_private_key.pem -o StrictHostKeychecking=no ./server-conf/backup.zip $USERHOST@$IPHOST:~/backup.zip
 	fi
 
-	ssh -i baremetal_server_private_key.pem -o StrictHostKeychecking=no $USERHOST@$IPHOST "bash /tmp/install.sh"
+	ssh -i baremetal_server_private_key.pem -o StrictHostKeychecking=no $USERHOST@$IPHOST "sudo bash /tmp/install.sh"
 
 destroy:
 	bash ./utils/destroy.sh
