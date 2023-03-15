@@ -9,6 +9,7 @@ server-conf/rclone.conf
 ## credentials
 creds/*
 secret.json
+server_private_key.pem
 
 ## Terraform
 

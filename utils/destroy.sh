@@ -12,6 +12,6 @@ terraform -chdir=./infrastructure destroy  --auto-approve
 
 echo -e "terraform {\n\trequired_version = \">= 1.2.0\"\n}" > ./infrastructure/backend.tf
 
-rm -rf ./creds
+rm -rf ./server_private_key.pem
 rm ./ip_host
 rm ./user_host

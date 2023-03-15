@@ -1,9 +1,5 @@
-  terraform {
+terraform {
   required_version = ">= 1.2.0"
-  #backend "gcs" {
-  # bucket  = "BUCKET_NAME"
-  # prefix  = "terraform/state"
- #}
 }
 
 provider "google" {
@@ -16,14 +12,9 @@ resource "random_id" "bucket_prefix" {
   byte_length = 8
 }
 
-resource "google_storage_bucket" "default" {
-  name          = "${random_id.bucket_prefix.hex}-bucket-tfstate"
-  force_destroy = false
-  location      = "US"
-  storage_class = "STANDARD"
-  versioning {
-    enabled = true
-  }
+resource "tls_private_key" "server_key" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
 }
 
 resource "google_compute_network" "vpc_network" {
@@ -59,30 +50,30 @@ resource "google_compute_instance" "default" {
   }
 
   metadata = {
-    ssh-keys = "${var.user}:${file("./../creds/gcloud_instance.pub")}"
+    ssh-keys = "${var.user}:${tls_private_key.server_key.public_key_openssh}"
   }
 
   connection {
-    host = "${self.network_interface.0.access_config.0.nat_ip}"
+    host = self.network_interface.0.access_config.0.nat_ip
     type = "ssh"
-    user = "${var.user}"
-    private_key = "${file("./../creds/gcloud_instance")}"
+    user = var.user
+    private_key = tls_private_key.server_key.private_key_pem
     agent = "false"
   }
 
   provisioner "file" {
-    source = "${var.use_backup}" == "yes" ? "./../server-conf/backup.zip" : "./../server-conf/server.properties"
-    destination = "${var.use_backup}" == "yes" ? "/home/${var.user}/backup.zip" :"/home/${var.user}/server.properties"
+    source = var.use_backup == "yes" ? "./../server-conf/backup.zip" : "./../server-conf/server.properties"
+    destination = var.use_backup == "yes" ? "/home/${var.user}/backup.zip" :"/home/${var.user}/server.properties"
   }
 
   provisioner "file" {
-    count = var.use_backup ? 1 : 0
+    count = var.use_backup == "yes" ? 1 : 0
     source = "./../server-conf/rclone.conf"
     destination = "/home/${var.user}/rclone.conf"
   }
 
   provisioner "file" {
-    count = var.use_plugins ? 1 : 0
+    count = var.use_plugins == "yes" ? 1 : 0
     source = "./../server-conf/plugins.zip"
     destination = "/home/${var.user}/plugins.zip"
   }
@@ -178,4 +169,8 @@ output "user_host" {
 
 output "use_backup" {
   value = "${var.use_backup}"
+}
+
+output "server_private_key" {
+  value = "${tls_private_key.server_key.private_key_pem}"
 }
