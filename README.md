@@ -110,6 +110,8 @@ There is an option for provisioning the server if you have a baremetal server.
 
 you need a **private key** for your server for an user with **SUDO** access.
 
+make sure that the user can access to sudo without password.
+
 Run
 ``USERHOST=[user] IPHOST=[ip] make baremetalProvision``
 (replace variables values with yours)
