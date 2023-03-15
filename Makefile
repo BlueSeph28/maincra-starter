@@ -25,5 +25,22 @@ provisioning:
 	$(eval userhost := $(shell cat ./user_host))
 	ssh -i server_private_key.pem -o StrictHostKeychecking=no $(userhost)@$(iphost) "bash /tmp/install_script.sh"
 
+.ONESHELL:
+baremetalProvision:
+	scp -i baremetal_server_private_key.pem -o StrictHostKeychecking=no ./utils/baremetal-install.sh $USERHOST@$IPHOST:/tmp/install.sh
+	scp -i baremetal_server_private_key.pem -o StrictHostKeychecking=no ./server-conf/rclone.conf $USERHOST@$IPHOST:~/rclone.conf
+
+	if [ -a ./server-conf/plugins.zip ];
+	then
+	scp -i baremetal_server_private_key.pem -o StrictHostKeychecking=no ./server-conf/plugins.zip $USERHOST@$IPHOST:~/plugins.zip
+	fi
+
+	if [ -a ./server-conf/backup.zip ];
+	then
+	scp -i baremetal_server_private_key.pem -o StrictHostKeychecking=no ./server-conf/backup.zip $USERHOST@$IPHOST:~/backup.zip
+	fi
+
+	ssh -i baremetal_server_private_key.pem -o StrictHostKeychecking=no $USERHOST@$IPHOST "bash /tmp/install.sh"
+
 destroy:
 	bash ./utils/destroy.sh

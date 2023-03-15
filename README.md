@@ -17,6 +17,7 @@
         - [Main process](#main-process)
       - [For destroying your infrastructure](#for-destroying-your-infrastructure)
       - [If you want to use a backup file](#if-you-want-to-use-a-backup-file)
+      - [Do you have a baremetal server?](#do-you-have-a-baremetal-server)
 
 ## Security
 
@@ -101,3 +102,17 @@ gcloud services enable cloudbilling.googleapis.com
 1. Put your backup.zip file in the root path of this repo (Don't push it into remote!)
 1. Change variable use_backup in infrastructure/variables.tf to yes
 1. do the [main](#mainprocess) process
+
+
+#### Do you have a baremetal server?
+
+There is an option for provisioning the server if you have a baremetal server.
+
+you need a **private key** for your server for an user with **SUDO** access.
+
+Run
+``USERHOST=[user] IPHOST=[ip] make baremetalProvision``
+(replace variables values with yours)
+
+makefile will check if you have plugins.zip and backup.zip files on the path ./server-conf/
+if a file exists, will be copied into the server and used.
