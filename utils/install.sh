@@ -14,11 +14,9 @@ rclone config show
 RCLONEFILE=$(rclone config file | tail -1)
 mv /home/$USER/rclone.conf $RCLONEFILE
 
-mkdir /home/$USER/plugins
 mkdir /home/$USER/mcServer-backup
 rclone sync maincra-drive:/ /home/$USER/mcServer-backup/
 
-chmod 774 /home/$USER/plugins
 chmod 774 /home/$USER/mcServer-backup
 
 sudo apt-get install -y wget unzip zip
@@ -26,6 +24,8 @@ sudo apt-get install -y wget unzip zip
 if test -f "/home/$USER/plugins.zip"; then
   unzip /home/$USER/plugins.zip
   rm /home/$USER/plugins.zip
+else
+  mkdir /home/$USER/plugins
 fi
 
 if test -f "/home/$USER/backup.zip"; then
@@ -37,6 +37,7 @@ else
 fi
 
 chmod 774 /home/$USER/mcServer
+chmod 774 /home/$USER/plugins
 
 sudo docker run -d -v /home/$USER/plugins:/data/mods -v /home/$USER/mcServer:/data --name mcServer -e MOTD='David es joto automatizado' -e MODE=survival -e PVP=true -e VERSION=1.19.2 -e EULA=TRUE -e ENABLE_RCON=TRUE -e RCON_PASSWORD=davidjoto2806 -e REPLACE_ENV_VARIABLES=TRUE -e TYPE=FABRIC -e PLUGINS_SYNC_UPDATE=false -p 25565:25565 -p 25575:25575 -p 19132:19132/udp itzg/minecraft-server
 
