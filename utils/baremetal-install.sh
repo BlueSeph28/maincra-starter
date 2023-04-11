@@ -6,7 +6,7 @@ RCLONEFILE=$(rclone config file | tail -1)
 mv /home/$USER/rclone.conf $RCLONEFILE
 
 mkdir /home/$USER/mcServer-backup
-rclone sync maincra-drive:/ /home/$USER/mcServer-backup/
+rclone sync -P maincra-drive:/ /home/$USER/mcServer-backup/
 
 chmod 774 /home/$USER/mcServer-backup
 
